@@ -16,7 +16,8 @@ const Create = ({ location }) => {
   const LANGUAGE = ["Korean", "English"];
   
   useEffect(() => {
-    const { nick, color } = queryString.parse(location.search);
+    const { nick, color } = queryString.parse(rot13(location.search));
+    
     if(nick && color){
       setNick(nick);
       setColor(color);
@@ -40,7 +41,7 @@ const Create = ({ location }) => {
           LANGUAGE.map((item, i) => <option key={i} value={item}>{item}</option>)
         }
       </select>
-      <Link to={`/play?${rot13(`nick=${nick}&color=${color}&round=${round}&timer=${timer}&language=${language}`)}`}>
+      <Link to={'/play'+rot13(`?nick=${nick}&color=${color}&round=${round}&timer=${timer}&language=${language}&create=true`)}>
         <button>Create</button>
       </Link>
     </div>
