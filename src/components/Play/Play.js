@@ -17,6 +17,7 @@ const Play = ({ location }) => {
   const [round, setRound] = useState(0);
   const [answer, setAnswer] = useState("");
   const [words, setWords] = useState([]);
+  const [privateChat, setPrivateChat] = useState(false);
 
   const ENDPOINT = `http://localhost:4000`;
 
@@ -63,8 +64,14 @@ const Play = ({ location }) => {
   }, [ENDPOINT, location.search]);
 
   useEffect(() => {
-    socket.on("message", message => {
-      setMessages([...messages, message]);
+    socket.on("message", (message) => {
+      if(message.private){
+        if(privateChat){
+          setMessages([...messages, message]);
+        }
+      } else {
+        setMessages([...messages, message]);
+      }
     });
 
     socket.on("online", update => {
@@ -83,7 +90,7 @@ const Play = ({ location }) => {
     });
 
     socket.on("drawing2", ({ time, word }) => {
-      console.log("타이머 시작");
+      setAnswer(word);
       const start = time;
       const countDown = setInterval(function() {
         const delta = Date.now() - start;
@@ -99,7 +106,7 @@ const Play = ({ location }) => {
 
       socket.off();
     };
-  }, [messages, users, timer]);
+  }, [messages, users, timer, privateChat]);
 
 
   useEffect(() => {
@@ -112,7 +119,19 @@ const Play = ({ location }) => {
 
   const sendMessage = event => {
     event.preventDefault();
-    socket.emit("sendMessage", message, () => setMessage(""));
+    if(message === answer){ 
+      socket.emit('correct', () => {
+        setPrivateChat(true)
+        setMessage("");
+      }) // 정답을 맞춤
+    }
+    else {
+      if(!privateChat){
+        socket.emit("sendMessage", message, () => setMessage(""));
+      } else {
+        socket.emit("privateMessage", message, () => setMessage(""));
+      }
+    }
   };
 
   const startGame = () => {
