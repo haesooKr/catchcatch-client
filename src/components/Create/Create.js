@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import queryString from 'query-string';
 import { Link } from 'react-router-dom';
 
+import rot13 from '../../lib/rot13';
+
 const Create = ({ location }) => {
   const [nick, setNick] = useState('');
   const [color, setColor] = useState('white');
@@ -43,14 +45,6 @@ const Create = ({ location }) => {
       </Link>
     </div>
   )
-}
-
-function rot13(str) {
-  var input     = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  var output    = 'NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm';
-  var index     = x => input.indexOf(x);
-  var translate = x => index(x) > -1 ? output[index(x)] : x;
-  return str.split('').map(translate).join('');
 }
 
 export default Create;
