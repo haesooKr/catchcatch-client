@@ -2,17 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import queryString from 'query-string';
 
+import rot13 from '../../lib/rot13';
+
 const Join = ({ location }) => {
   const [nick, setNick] = useState('');
   const [color, setColor] = useState('white');
   const [room, setRoom] = useState('random');
 
   useEffect(() => {
-    const { hasRoom } = queryString.parse(location.search) || false;
-    if(hasRoom){
-      setRoom(hasRoom);
+    const { code } = queryString.parse(location.search) || false;
+    if(code){
+      let decoded = rot13(code);
+      setRoom(decoded);
     }
-  }, [location.search])
+  }, [location.search, room])
   
 
   return (
@@ -29,10 +32,10 @@ const Join = ({ location }) => {
         <option value="indigo">indigo</option>
         <option value="black">black</option>
       </select>
-      <Link onClick={event => (!nick) ? event.preventDefault() : null} to={`/play?nick=${nick}&color=${color}&room=${room}`}>
+      <Link onClick={event => (!nick) ? event.preventDefault() : null} to={`/play`+rot13(`?nick=${nick}&color=${color}&inviteCode=${room}`)}>
         <button className="playButton">Play</button>
       </Link>
-      <Link onClick={event => (!nick) ? event.preventDefault() : null} to={`/create?nick=${nick}&color=${color}`}>
+      <Link onClick={event => (!nick) ? event.preventDefault() : null} to={`/create`+rot13(`?nick=${nick}&color=${color}`)}>
         <button className="createButton">Create Private Room</button>
       </Link>
     </div>
