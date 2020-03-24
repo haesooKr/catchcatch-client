@@ -74,6 +74,7 @@ const Play = ({ location }) => {
     socket.on("start", ({ round, timer, turn, words }) => {
       setRound(round);
       setTimer(timer);
+      console.log(round, timer);
 
       if (turn === socket.id) {
         setTurn(true);
@@ -82,8 +83,6 @@ const Play = ({ location }) => {
     });
 
     socket.on("drawing2", ({ time, word }) => {
-      console.log("드로잉 전달받음", word);
-
       console.log("타이머 시작");
       const start = time;
       const countDown = setInterval(function() {
@@ -100,7 +99,8 @@ const Play = ({ location }) => {
 
       socket.off();
     };
-  }, [messages, users]);
+  }, [messages, users, timer]);
+
 
   useEffect(() => {
     
