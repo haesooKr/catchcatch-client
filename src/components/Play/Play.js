@@ -18,6 +18,8 @@ const Play = ({ location }) => {
   const [answer, setAnswer] = useState("");
   const [words, setWords] = useState([]);
   const [privateChat, setPrivateChat] = useState(false);
+  const [points, setPoints] = useState([]);
+  const [int, setInt] = useState(() => {})
 
   const ENDPOINT = `http://localhost:4000`;
 
@@ -64,6 +66,20 @@ const Play = ({ location }) => {
   }, [ENDPOINT, location.search]);
 
   useEffect(() => {
+    const countDownStart = ( start ) => { 
+      const interval = setInterval(function(){
+        const delta = Date.now() - start;
+        
+        setTimer(timer - Math.floor(delta / 1000))
+  
+        if(timer - Math.floor(delta / 1000) <= 0){
+          clearInterval(interval);
+        }
+      }, 1000);
+  
+      return interval;
+    }
+
     socket.on("message", (message) => {
       if(message.private){
         if(privateChat){
@@ -81,7 +97,6 @@ const Play = ({ location }) => {
     socket.on("start", ({ round, timer, turn, words }) => {
       setRound(round);
       setTimer(timer);
-      console.log(round, timer);
 
       if (turn === socket.id) {
         setTurn(true);
@@ -91,29 +106,37 @@ const Play = ({ location }) => {
 
     socket.on("drawing2", ({ time, word }) => {
       setAnswer(word);
-      const start = time;
-      const countDown = setInterval(function() {
-        const delta = Date.now() - start;
-        setTimer(timer - Math.floor(delta / 1000));
-        if (timer - Math.floor(delta / 1000) <= 0) {
-          clearInterval(countDown);
-        }
-      }, 1000);
+      
+      setInt(countDownStart(time));
     });
+
+    socket.on("next", ({ timer, turn, points, words }) => {
+      clearInterval(int);
+      setInt(() => {});
+      //reset timer
+
+      (socket.id === turn) ? setTurn(true) : setTurn(false);
+      setAnswer("");
+      setPrivateChat(false);
+      setTimer(timer);
+      setPoints(points);
+      setWords(words);
+    }) 
 
     return () => {
       socket.emit("disconnect");
 
       socket.off();
     };
-  }, [messages, users, timer, privateChat]);
+  }, [messages, users, timer, privateChat, answer, int]);
 
 
   useEffect(() => {
     
-  }, [turn, words]);
+  }, [answer]);
 
   const chooseWord = word => {
+    // document.querySelectorAll(".word").forEach(word => word.parentNode.removeChild(word))
     socket.emit("drawing", word);
   };
 
@@ -175,6 +198,7 @@ const Play = ({ location }) => {
         ? words.map((word, i) => (
             <button
               key={i}
+              className="word"
               value={word}
               onClick={event => chooseWord(event.target.value)}
             >
