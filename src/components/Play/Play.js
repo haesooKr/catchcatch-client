@@ -132,11 +132,14 @@ const Play = ({ location }) => {
 
 
   useEffect(() => {
-    
+    if(answer !== ""){
+      document.querySelectorAll(".word").forEach(word => word.style.display = "none");
+    } else {
+      document.querySelectorAll(".word").forEach(word => word.style.display = "inline-block");
+    }
   }, [answer]);
 
   const chooseWord = word => {
-    // document.querySelectorAll(".word").forEach(word => word.parentNode.removeChild(word))
     socket.emit("drawing", word);
   };
 
