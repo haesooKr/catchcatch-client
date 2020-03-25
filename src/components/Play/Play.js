@@ -101,7 +101,7 @@ const Play = ({ location }) => {
       if (turn === socket.id) {
         setTurn(true);
         setWords(words);
-      }
+      } 
     });
 
     socket.on("drawing2", ({ time, word }) => {
@@ -116,11 +116,11 @@ const Play = ({ location }) => {
       //reset timer
 
       (socket.id === turn) ? setTurn(true) : setTurn(false);
+      (socket.id === turn) ? setWords(words) : setWords([]);
       setAnswer("");
       setPrivateChat(false);
       setTimer(timer);
       setPoints(points);
-      setWords(words);
     }) 
 
     return () => {
