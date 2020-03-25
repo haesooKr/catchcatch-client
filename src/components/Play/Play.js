@@ -3,6 +3,7 @@ import queryString from "query-string";
 import io from "socket.io-client";
 
 import rot13 from "../../lib/rot13";
+import Paint from "./Paint/Paint";
 
 let socket;
 
@@ -20,6 +21,8 @@ const Play = ({ location }) => {
   const [privateChat, setPrivateChat] = useState(false);
   const [points, setPoints] = useState([]);
   const [int, setInt] = useState(() => {})
+  const [paintData, setPaintData] = useState(null);
+  const [paintedData, setPaintedData] = useState(null);
 
   const ENDPOINT = `http://localhost:4000`;
 
@@ -123,6 +126,11 @@ const Play = ({ location }) => {
       setPoints(points);
     }) 
 
+    socket.on('backData', (data) => {
+      console.log('backData')
+      setPaintedData(data);
+    })
+
     return () => {
       socket.emit("disconnect");
 
@@ -138,6 +146,30 @@ const Play = ({ location }) => {
       document.querySelectorAll(".word").forEach(word => word.style.display = "inline-block");
     }
   }, [answer]);
+
+  useEffect(() => {
+    const sendData = () => {
+      console.log('send data')
+      if(paintData !== null){
+        console.log(paintData);
+        const img = paintData;
+        const binary = new Uint8Array(img.data.length);
+        for(let i=0; i<img.data.length; i++){
+          binary[i] = img.data[i];
+        }
+        socket.emit('sendData', binary.buffer);
+      }
+    }
+
+    console.log('sendData')
+    sendData();
+
+    return () => {
+      socket.emit("disconnect");
+
+      socket.off();
+    }
+  }, [paintData])
 
   const chooseWord = word => {
     socket.emit("drawing", word);
@@ -165,6 +197,7 @@ const Play = ({ location }) => {
     const button = document.querySelector(".startButton");
     button.parentNode.removeChild(button);
   };
+
 
   return (
     <div>
@@ -209,6 +242,7 @@ const Play = ({ location }) => {
             </button>
           ))
         : null}
+        <Paint paintedData={paintedData} setPaintData={setPaintData}></Paint>
     </div>
   );
 };
