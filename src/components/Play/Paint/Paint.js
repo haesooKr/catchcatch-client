@@ -12,7 +12,6 @@ const Paint = ({ paintedData, setPaintData }) => {
     const range = document.querySelector(".js-range");
     const mode = document.querySelector(".js-mode");
     const erase = document.querySelector(".js-erase");
-    const send = document.querySelector(".js-send");
 
     const INITIAL_COLOR = "#2c2c2c";
     const CANVAS_SIZE = 500;
@@ -106,7 +105,10 @@ const Paint = ({ paintedData, setPaintData }) => {
       canvas.addEventListener("mousedown", startPainting);
       canvas.addEventListener("mouseup", stopPainting);
       canvas.addEventListener("mouseleave", stopPainting);
-      canvas.addEventListener("click", handleCanvasClick);
+      canvas.addEventListener("click", () => {
+        handleCanvasClick();
+        setPaintData(ctx.getImageData(0, 0, canvas.width, canvas.height));
+      });
       canvas.addEventListener("contextmenu", handleContextMenu);
     }
 
@@ -115,14 +117,10 @@ const Paint = ({ paintedData, setPaintData }) => {
     }
 
     if (erase) {
-      erase.addEventListener("click", handleEraseClick);
-    }
-
-    if (send){
-      send.addEventListener('click', () => {
-        console.log("data", ctx.getImageData(0, 0, canvas.width, canvas.height));
-        setPaintData(ctx.getImageData(0, 0, canvas.width, canvas.height))
-      })
+      erase.addEventListener("click", () => {
+        handleEraseClick();
+        setPaintData(ctx.getImageData(0, 0, canvas.width, canvas.height));
+      });
     }
   }, [setPaintData, paintedData]);
 
@@ -142,7 +140,6 @@ const Paint = ({ paintedData, setPaintData }) => {
         <div className="control_btns">
           <button className="js-mode">Fill</button>
           <button className="js-erase">Erase All</button>
-          <button className="js-send">Send</button>
         </div>
         <div className="js-colors control_colors">
           <div className="js-color control_color" style={{backgroundColor: '#2c2c2c'}}></div>
