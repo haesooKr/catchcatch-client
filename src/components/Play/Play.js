@@ -161,14 +161,7 @@ const Play = ({ location }) => {
       }
     }
 
-    console.log('sendData')
     sendData();
-
-    return () => {
-      socket.emit("disconnect");
-
-      socket.off();
-    }
   }, [paintData])
 
   const chooseWord = word => {
@@ -179,9 +172,9 @@ const Play = ({ location }) => {
     event.preventDefault();
     if(message === answer && !turn && !privateChat){ 
       socket.emit('correct', () => {
-        setPrivateChat(true)
+        setPrivateChat(true) // bug fixed #2020032606
         setMessage("");
-      }) // 정답을 맞춤
+      }) 
     } else if(message !== answer && !turn && !privateChat){
       socket.emit("sendMessage", message, () => setMessage(""));
     }
@@ -240,7 +233,7 @@ const Play = ({ location }) => {
             </button>
           ))
         : null}
-        <Paint paintedData={paintedData} setPaintData={setPaintData}></Paint>
+        <Paint turn={turn} paintedData={paintedData} setPaintData={setPaintData}></Paint>;
     </div>
   );
 };
