@@ -1,11 +1,15 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import "./Paint.scss";
 
-const Paint = ({ paintedData, setPaintData }) => {
+const Paint = ({ turn, paintedData, setPaintData }) => {
+  console.log('rerendering');
+  const [condition, setCondition] = useState(false);
 
   const canvasRef = useRef(null);
 
   useEffect(() => {
+
+    console.log('rerendering2');
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const colors = document.querySelectorAll(".js-color");
@@ -39,6 +43,8 @@ const Paint = ({ paintedData, setPaintData }) => {
     let filling = false;
 
     function stopPainting() {
+      console.log('function executed')
+      console.dir(canvas)
       painting = false;
     }
 
@@ -83,15 +89,24 @@ const Paint = ({ paintedData, setPaintData }) => {
       if (filling) {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
+      sendData();
     }
 
     function handleContextMenu(e) {
+      console.log('프로전', condition);
+      e.stopPropagation();
+      console.log('프로후', condition);
       e.preventDefault();
     }
 
     function handleEraseClick() {
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      sendData();
+    }
+
+    function sendData(){
+      setPaintData(ctx.getImageData(0, 0, canvas.width, canvas.height));
     }
 
     Array.from(colors).forEach(color =>
@@ -105,10 +120,7 @@ const Paint = ({ paintedData, setPaintData }) => {
       canvas.addEventListener("mousedown", startPainting);
       canvas.addEventListener("mouseup", stopPainting);
       canvas.addEventListener("mouseleave", stopPainting);
-      canvas.addEventListener("click", () => {
-        handleCanvasClick();
-        setPaintData(ctx.getImageData(0, 0, canvas.width, canvas.height));
-      });
+      canvas.addEventListener("click", handleCanvasClick);
       canvas.addEventListener("contextmenu", handleContextMenu);
     }
 
@@ -117,16 +129,40 @@ const Paint = ({ paintedData, setPaintData }) => {
     }
 
     if (erase) {
-      erase.addEventListener("click", () => {
-        handleEraseClick();
-        setPaintData(ctx.getImageData(0, 0, canvas.width, canvas.height));
-      });
+      erase.addEventListener("click", handleEraseClick);
     }
-  }, [setPaintData, paintedData]);
+
+    return () => {
+      canvas.removeEventListener("mousemove", onMouseMove);
+      canvas.removeEventListener("mousedown", startPainting);
+      canvas.removeEventListener("mouseleave", stopPainting);
+      canvas.removeEventListener("click", handleCanvasClick);
+      canvas.removeEventListener("contextmenu", handleContextMenu);
+      canvas.removeEventListener("mouseup", stopPainting);
+      erase.removeEventListener("click", handleEraseClick);
+      mode.removeEventListener("click", handleModeClick);
+      range.removeEventListener("change", changeRange);
+      Array.from(colors).forEach(color =>
+        color.removeEventListener("click", changeColor)
+      );
+    }
+
+  }, [setPaintData, paintedData, condition]);
+
+  useEffect(() => {
+    if(turn === false){
+      setCondition(false)
+      document.querySelector(".control").style.display = "none";
+    } else {
+      setCondition(true);
+      document.querySelector(".control").style.display = "block";
+    }
+
+  }, [turn])
 
   return (
     <div className="paintContainer">
-      <canvas ref={canvasRef}/>
+      <canvas ref={canvasRef} className="canvas"/>
       <div className="control">
         <div className="control_range">
           <input
