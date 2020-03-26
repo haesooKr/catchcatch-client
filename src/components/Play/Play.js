@@ -177,18 +177,16 @@ const Play = ({ location }) => {
 
   const sendMessage = event => {
     event.preventDefault();
-    if(message === answer){ 
+    if(message === answer && !turn && !privateChat){ 
       socket.emit('correct', () => {
         setPrivateChat(true)
         setMessage("");
       }) // 정답을 맞춤
+    } else if(message !== answer && !turn && !privateChat){
+      socket.emit("sendMessage", message, () => setMessage(""));
     }
     else {
-      if(!privateChat){
-        socket.emit("sendMessage", message, () => setMessage(""));
-      } else {
-        socket.emit("privateMessage", message, () => setMessage(""));
-      }
+      socket.emit("privateMessage", message, () => setMessage(""));
     }
   };
 
