@@ -23,6 +23,7 @@ const Play = ({ location }) => {
   const [int, setInt] = useState(() => {})
   const [paintData, setPaintData] = useState(null);
   const [paintedData, setPaintedData] = useState(null);
+  const [canPaint, setCanPaint] = useState(false);
 
   const ENDPOINT = `http://localhost:4000`;
 
@@ -108,9 +109,15 @@ const Play = ({ location }) => {
     });
 
     socket.on("drawing2", ({ time, word }) => {
+      setPaintedData(null);
       setAnswer(word);
-      
       setInt(countDownStart(time));
+
+      if(turn){
+        setCanPaint(true);
+      } else {
+        setCanPaint(false);
+      }
     });
 
     socket.on("next", ({ timer, turn, points, words }) => {
@@ -136,7 +143,7 @@ const Play = ({ location }) => {
 
       socket.off();
     };
-  }, [messages, users, timer, privateChat, answer, int]);
+  }, [messages, users, timer, privateChat, answer, int, turn]);
 
 
   useEffect(() => {
@@ -170,6 +177,9 @@ const Play = ({ location }) => {
 
   const sendMessage = event => {
     event.preventDefault();
+    if(message === "##turn"){
+     setTurn(!turn);   
+    } // test code
     if(message === answer && !turn && !privateChat){ 
       socket.emit('correct', () => {
         setPrivateChat(true) // bug fixed #2020032606
@@ -233,7 +243,7 @@ const Play = ({ location }) => {
             </button>
           ))
         : null}
-        <Paint turn={turn} paintedData={paintedData} setPaintData={setPaintData}></Paint>;
+        <Paint canPaint={canPaint} paintedData={paintedData} setPaintData={setPaintData}></Paint>;
     </div>
   );
 };
