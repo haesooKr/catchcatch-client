@@ -1,15 +1,15 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import "./Paint.scss";
 
-const Paint = ({ turn, paintedData, setPaintData }) => {
-  console.log('rerendering');
-  const [condition, setCondition] = useState(false);
+const Paint = ({ canPaint, paintedData, setPaintData }) => {
 
   const canvasRef = useRef(null);
 
   useEffect(() => {
 
-    console.log('rerendering2');
+    console.log(canPaint);
+
+    
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const colors = document.querySelectorAll(".js-color");
@@ -29,14 +29,13 @@ const Paint = ({ turn, paintedData, setPaintData }) => {
     ctx.fillStyle = INITIAL_COLOR;
     ctx.lineWidth = 2.5;
 
-    if(paintedData != null){
-      console.log(paintedData);
-      console.log('타입', typeof paintedData)
-      console.log(new Uint8Array(paintedData))
+    if(paintedData != null && canPaint === false){
       const imageData = ctx.createImageData(canvas.width, canvas.height);
       imageData.data.set(new Uint8Array(paintedData));
-      console.log(imageData);
       ctx.putImageData(imageData, 0, 0)
+    } else {
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
     let painting = false;
@@ -93,9 +92,6 @@ const Paint = ({ turn, paintedData, setPaintData }) => {
     }
 
     function handleContextMenu(e) {
-      console.log('프로전', condition);
-      e.stopPropagation();
-      console.log('프로후', condition);
       e.preventDefault();
     }
 
@@ -115,7 +111,7 @@ const Paint = ({ turn, paintedData, setPaintData }) => {
     // color change buttons
     range.addEventListener("change", changeRange);
 
-    if (canvas) {
+    if (canvas && canPaint) {
       canvas.addEventListener("mousemove", onMouseMove);
       canvas.addEventListener("mousedown", startPainting);
       canvas.addEventListener("mouseup", stopPainting);
@@ -124,15 +120,17 @@ const Paint = ({ turn, paintedData, setPaintData }) => {
       canvas.addEventListener("contextmenu", handleContextMenu);
     }
 
-    if (mode) {
+    if (mode && canPaint) {
       mode.addEventListener("click", handleModeClick);
     }
 
-    if (erase) {
+    if (erase && canPaint) {
       erase.addEventListener("click", handleEraseClick);
     }
 
     return () => {
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       canvas.removeEventListener("mousemove", onMouseMove);
       canvas.removeEventListener("mousedown", startPainting);
       canvas.removeEventListener("mouseleave", stopPainting);
@@ -147,18 +145,16 @@ const Paint = ({ turn, paintedData, setPaintData }) => {
       );
     }
 
-  }, [setPaintData, paintedData, condition]);
+  }, [setPaintData, paintedData, canPaint]);
 
   useEffect(() => {
-    if(turn === false){
-      setCondition(false)
+    if(canPaint === false){
       document.querySelector(".control").style.display = "none";
     } else {
-      setCondition(true);
       document.querySelector(".control").style.display = "block";
     }
 
-  }, [turn])
+  }, [canPaint])
 
   return (
     <div className="paintContainer">
