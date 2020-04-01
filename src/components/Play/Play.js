@@ -77,6 +77,7 @@ const Play = ({ location }) => {
         setTimer(timer - Math.floor(delta / 1000))
   
         if(timer - Math.floor(delta / 1000) <= 0){
+          socket.emit('timeOver')
           clearInterval(interval);
         }
       }, 1000);
