@@ -15,7 +15,7 @@ const Play = ({ location }) => {
   const [isHost, setIsHost] = useState(false);
   const [turn, setTurn] = useState(false);
   const [timer, setTimer] = useState(0);
-  const [round, setRound] = useState(0);
+  const [round, setRound] = useState(-1);
   const [answer, setAnswer] = useState("");
   const [words, setWords] = useState([]);
   const [privateChat, setPrivateChat] = useState(false);
@@ -121,7 +121,10 @@ const Play = ({ location }) => {
       }
     });
 
-    socket.on("next", ({ timer, turn, points, words }) => {
+    socket.on("next", ({ timer, turn, points, words, roundTurn }) => {
+      if(roundTurn){
+        setRound(round - 1);
+      }
       clearInterval(int);
       setInt(() => {});
       //reset timer
@@ -144,7 +147,7 @@ const Play = ({ location }) => {
 
       socket.off();
     };
-  }, [messages, users, timer, privateChat, answer, int, turn]);
+  }, [messages, users, timer, privateChat, answer, int, turn, round]);
 
 
   useEffect(() => {
@@ -154,6 +157,10 @@ const Play = ({ location }) => {
       document.querySelectorAll(".word").forEach(word => word.style.display = "inline-block");
     }
   }, [answer]);
+
+  useEffect(() => {
+    // after all rounds over
+  }, [round])
 
   useEffect(() => {
     const sendData = () => {
