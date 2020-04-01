@@ -206,7 +206,7 @@ const Play = ({ location }) => {
       {isHost ? `InviteCode ${inviteCode}` : null}
       {users.map((user, i) => (
         <div key={i}>
-          {user.nick}, {user.color}
+          {user.nick}, {user.color}, {points[i]}
         </div>
       ))}
       {messages.map((message, i) => (
