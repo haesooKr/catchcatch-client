@@ -57,7 +57,10 @@ const Play = ({ location }) => {
       );
     } else {
       if (inviteCode !== "random") {
-        socket.emit("join", { nick, color, code: inviteCode });
+        socket.emit("join", { nick, color, code: inviteCode }, () => {
+          alert("현재 게임이 진행중입니다. 다른 방에 입장하거나 기다려주십시오.");
+          window.history.go(-1);
+        });
       } else {
         socket.emit("join", { nick, color, code: "random" }, () => {
           alert(
@@ -159,7 +162,7 @@ const Play = ({ location }) => {
   }, [answer]);
 
   useEffect(() => {
-    // after all rounds over
+    console.log('Game Ends');
   }, [round])
 
   useEffect(() => {
