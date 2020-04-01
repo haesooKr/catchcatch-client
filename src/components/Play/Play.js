@@ -177,9 +177,6 @@ const Play = ({ location }) => {
 
   const sendMessage = event => {
     event.preventDefault();
-    if(message === "##turn"){
-     setTurn(!turn);   
-    } // test code
     if(message === answer && !turn && !privateChat){ 
       socket.emit('correct', () => {
         setPrivateChat(true) // bug fixed #2020032606
