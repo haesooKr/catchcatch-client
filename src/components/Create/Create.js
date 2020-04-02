@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import queryString from 'query-string';
 import { Link } from 'react-router-dom';
+import './Create.scss';
 
 import rot13 from '../../lib/rot13';
 
@@ -26,17 +27,18 @@ const Create = ({ location }) => {
 
   return (
     <div className="createContainer">
-      <select id="round" onChange={(event) => setRound(event.target.value)}>
+      <span>Room Setting</span>
+      Round<select id="round" onChange={(event) => setRound(event.target.value)}>
         {
           ROUND.map((item, i) => <option key={i} value={item}>{item}</option>)
         }
       </select>
-      <select id="timer" onChange={(event) => setTimer(event.target.value)}>
+      Timer<select id="timer" onChange={(event) => setTimer(event.target.value)}>
         {
           TIMER.map((item, i) => <option key={i} value={item}>{item}</option>)
         }
       </select>
-      <select id="language" onChange={(event) => setLanguage(event.target.value)}>
+      Language<select id="language" onChange={(event) => setLanguage(event.target.value)}>
         {
           LANGUAGE.map((item, i) => <option key={i} value={item}>{item}</option>)
         }
