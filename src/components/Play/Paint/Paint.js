@@ -7,8 +7,6 @@ const Paint = ({ canPaint, paintedData, setPaintData }) => {
 
   useEffect(() => {
 
-    console.log(canPaint);
-
     
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -41,19 +39,21 @@ const Paint = ({ canPaint, paintedData, setPaintData }) => {
     let painting = false;
     let filling = false;
 
-    function stopPainting() {
-      console.log('function executed')
-      console.dir(canvas)
+    function stopPainting(e) {
+      e.preventDefault();
       painting = false;
     }
 
     function startPainting(e) {
+      e.preventDefault();
       painting = true;
     }
 
     function onMouseMove(e) {
-      const x = e.offsetX;
-      const y = e.offsetY;
+      e.preventDefault();
+      let rect = canvas.getBoundingClientRect();
+      const x = e.offsetX || e.touches[0].clientX - rect.left;;
+      const y = e.offsetY || e.touches[0].clientY - rect.top;;
       if (!painting) {
         ctx.beginPath();
         ctx.moveTo(x, y);
@@ -112,6 +112,11 @@ const Paint = ({ canPaint, paintedData, setPaintData }) => {
     range.addEventListener("change", changeRange);
 
     if (canvas && canPaint) {
+      canvas.addEventListener("touchmove", onMouseMove);
+      canvas.addEventListener("touchstart", startPainting);
+      canvas.addEventListener("touchend", stopPainting);
+      canvas.addEventListener("touchcancel", stopPainting);
+
       canvas.addEventListener("mousemove", onMouseMove);
       canvas.addEventListener("mousedown", startPainting);
       canvas.addEventListener("mouseup", stopPainting);
@@ -131,6 +136,11 @@ const Paint = ({ canPaint, paintedData, setPaintData }) => {
     return () => {
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      canvas.removeEventListener("touchmove", onMouseMove);
+      canvas.removeEventListener("touchstart", startPainting);
+      canvas.removeEventListener("touchend", stopPainting);
+      canvas.removeEventListener("touchcancel", stopPainting);
+
       canvas.removeEventListener("mousemove", onMouseMove);
       canvas.removeEventListener("mousedown", startPainting);
       canvas.removeEventListener("mouseleave", stopPainting);
