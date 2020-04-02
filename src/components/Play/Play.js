@@ -4,6 +4,9 @@ import io from "socket.io-client";
 
 import rot13 from "../../lib/rot13";
 import Paint from "./Paint/Paint";
+import ScrollToBottom from 'react-scroll-to-bottom';
+
+import "./Play.scss";
 
 let socket;
 
@@ -20,7 +23,7 @@ const Play = ({ location }) => {
   const [words, setWords] = useState([]);
   const [privateChat, setPrivateChat] = useState(false);
   const [points, setPoints] = useState([]);
-  const [int, setInt] = useState(() => {})
+  const [int, setInt] = useState(() => {});
   const [paintData, setPaintData] = useState(null);
   const [paintedData, setPaintedData] = useState(null);
   const [canPaint, setCanPaint] = useState(false);
@@ -57,21 +60,21 @@ const Play = ({ location }) => {
       );
     } else {
       if (inviteCode !== "random") {
-        socket.emit("join", { nick, color, code: inviteCode }, (error) => {
-          if(error) {
-            alert(error)
-          }
-          else {
-            alert("현재 게임이 진행중입니다. 다른 방에 입장하거나 기다려주십시오.");
+        socket.emit("join", { nick, color, code: inviteCode }, error => {
+          if (error) {
+            alert(error);
+          } else {
+            alert(
+              "현재 게임이 진행중입니다. 다른 방에 입장하거나 기다려주십시오."
+            );
           }
           window.history.go(-1);
         });
       } else {
-        socket.emit("join", { nick, color, code: "random" }, (error) => {
-          if(error) {
+        socket.emit("join", { nick, color, code: "random" }, error => {
+          if (error) {
             alert(error);
-          }
-          else {
+          } else {
             alert(
               "랜덤입장은 아직 준비중입니다. 초대받은 주소로 접속 후 플레이를 눌러주세요"
             );
@@ -83,24 +86,27 @@ const Play = ({ location }) => {
   }, [ENDPOINT, location.search]);
 
   useEffect(() => {
-    const countDownStart = ( start ) => { 
-      const interval = setInterval(function(){
+    const countDownStart = start => {
+      const interval = setInterval(function() {
         const delta = Date.now() - start;
-        
-        setTimer(timer - Math.floor(delta / 1000))
-  
-        if(timer - Math.floor(delta / 1000) <= 0){
-          socket.emit('timeOver')
+
+        setTimer(timer - Math.floor(delta / 1000));
+
+        if (timer - Math.floor(delta / 1000) <= 0) {
+          if (turn) {
+            socket.emit("timeOver");
+            setCanPaint(false);
+          }
           clearInterval(interval);
         }
       }, 1000);
-  
-      return interval;
-    }
 
-    socket.on("message", (message) => {
-      if(message.private){
-        if(privateChat){
+      return interval;
+    };
+
+    socket.on("message", message => {
+      if (message.private) {
+        if (privateChat) {
           setMessages([...messages, message]);
         }
       } else {
@@ -110,9 +116,9 @@ const Play = ({ location }) => {
 
     socket.on("online", (update, reset) => {
       setUsers(update);
-      if(reset && update){
-        resetRoom(update[0].id)
-        socket.emit('turnReset');
+      if (reset && update && isHost === false) {
+        resetRoom(update[0].id);
+        socket.emit("turnReset");
       }
     });
 
@@ -123,7 +129,7 @@ const Play = ({ location }) => {
       if (turn === socket.id) {
         setTurn(true);
         setWords(words);
-      } 
+      }
     });
 
     socket.on("drawing2", ({ time, word }) => {
@@ -131,7 +137,7 @@ const Play = ({ location }) => {
       setAnswer(word);
       setInt(countDownStart(time));
 
-      if(turn){
+      if (turn) {
         setCanPaint(true);
       } else {
         setCanPaint(false);
@@ -139,25 +145,24 @@ const Play = ({ location }) => {
     });
 
     socket.on("next", ({ timer, turn, points, words, roundTurn }) => {
-      if(roundTurn){
+      if (roundTurn) {
         setRound(round - 1);
       }
       clearInterval(int);
       setInt(() => {});
       //reset timer
 
-      (socket.id === turn) ? setTurn(true) : setTurn(false);
-      (socket.id === turn) ? setWords(words) : setWords([]);
+      socket.id === turn ? setTurn(true) : setTurn(false);
+      socket.id === turn ? setWords(words) : setWords([]);
       setAnswer("");
       setPrivateChat(false);
       setTimer(timer);
       setPoints(points);
-    }) 
+    });
 
-    socket.on('backData', (data) => {
-      console.log('backData')
+    socket.on("backData", data => {
       setPaintedData(data);
-    })
+    });
 
     return () => {
       socket.emit("disconnect");
@@ -166,35 +171,36 @@ const Play = ({ location }) => {
     };
   }, [messages, users, timer, privateChat, answer, int, turn, round]);
 
-
   useEffect(() => {
-    if(answer !== ""){
-      document.querySelectorAll(".word").forEach(word => word.style.display = "none");
+    if (answer !== "") {
+      document
+        .querySelectorAll(".word")
+        .forEach(word => (word.style.display = "none"));
     } else {
-      document.querySelectorAll(".word").forEach(word => word.style.display = "inline-block");
+      document
+        .querySelectorAll(".word")
+        .forEach(word => (word.style.display = "inline-block"));
     }
   }, [answer]);
 
   useEffect(() => {
-    console.log('Game Ends');
-  }, [round])
+    console.log("Game Ends");
+  }, [round]);
 
   useEffect(() => {
     const sendData = () => {
-      console.log('send data')
-      if(paintData !== null){
-        console.log(paintData);
+      if (paintData !== null) {
         const img = paintData;
         const binary = new Uint8Array(img.data.length);
-        for(let i=0; i<img.data.length; i++){
+        for (let i = 0; i < img.data.length; i++) {
           binary[i] = img.data[i];
         }
-        socket.emit('sendData', binary.buffer);
+        socket.emit("sendData", binary.buffer);
       }
-    }
+    };
 
     sendData();
-  }, [paintData])
+  }, [paintData]);
 
   const chooseWord = word => {
     socket.emit("drawing", word);
@@ -202,15 +208,14 @@ const Play = ({ location }) => {
 
   const sendMessage = event => {
     event.preventDefault();
-    if(message === answer && !turn && !privateChat){ 
-      socket.emit('correct', () => {
-        setPrivateChat(true) // bug fixed #2020032606
+    if (message === answer && !turn && !privateChat) {
+      socket.emit("correct", () => {
+        setPrivateChat(true); // bug fixed #2020032606
         setMessage("");
-      }) 
-    } else if(message !== answer && !turn && !privateChat){
+      });
+    } else if (message !== answer && !turn && !privateChat) {
       socket.emit("sendMessage", message, () => setMessage(""));
-    }
-    else {
+    } else {
       socket.emit("privateMessage", message, () => setMessage(""));
     }
   };
@@ -221,22 +226,21 @@ const Play = ({ location }) => {
     button.parentNode.removeChild(button);
   };
 
-  const resetRoom = (id) => {
+  const resetRoom = id => {
     setRound(-1);
     setTimer(0);
-    setAnswer('');
+    setAnswer("");
     setTurn(false);
     setIsHost(true);
     setWords([]);
     setPrivateChat(false);
     setPoints([]);
     setCanPaint(false);
-    setInviteCode('http://localhost:3000/join?code=' + rot13(id));
-  }
-
+    setInviteCode("http://localhost:3000/join?code=" + rot13(id));
+  };
 
   return (
-    <div>
+    <div className="playContainer">
       {turn ? <h1>My turn</h1> : <h1>Guess the word</h1>}
       {isHost ? `InviteCode ${inviteCode}` : null}
       {users.map((user, i) => (
@@ -244,11 +248,13 @@ const Play = ({ location }) => {
           {user.nick}, {user.color}, {points[i]}
         </div>
       ))}
-      {messages.map((message, i) => (
-        <div key={i}>
-          {message.user}: {message.text}
-        </div>
-      ))}
+      <ScrollToBottom className="messages">
+        {messages.map((message, i) => (
+          <div key={i}>
+            {message.user}: {message.text}
+          </div>
+        ))}
+      </ScrollToBottom>
       <input
         value={message}
         onChange={event => setMessage(event.target.value)}
@@ -278,7 +284,11 @@ const Play = ({ location }) => {
             </button>
           ))
         : null}
-        <Paint canPaint={canPaint} paintedData={paintedData} setPaintData={setPaintData}></Paint>;
+      <Paint
+        canPaint={canPaint}
+        paintedData={paintedData}
+        setPaintData={setPaintData}
+      ></Paint>
     </div>
   );
 };
