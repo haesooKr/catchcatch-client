@@ -108,8 +108,12 @@ const Play = ({ location }) => {
       }
     });
 
-    socket.on("online", update => {
+    socket.on("online", (update, reset) => {
       setUsers(update);
+      if(reset && update){
+        resetRoom(update[0].id)
+        socket.emit('turnReset');
+      }
     });
 
     socket.on("start", ({ round, timer, turn, words }) => {
@@ -216,6 +220,19 @@ const Play = ({ location }) => {
     const button = document.querySelector(".startButton");
     button.parentNode.removeChild(button);
   };
+
+  const resetRoom = (id) => {
+    setRound(-1);
+    setTimer(0);
+    setAnswer('');
+    setTurn(false);
+    setIsHost(true);
+    setWords([]);
+    setPrivateChat(false);
+    setPoints([]);
+    setCanPaint(false);
+    setInviteCode(rot13(id));
+  }
 
 
   return (
