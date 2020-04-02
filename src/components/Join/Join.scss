@@ -1,0 +1,44 @@
+.joinContainer {
+  background-color: #0439D9;
+  width: 80vw;
+  padding: 50px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  input {
+    text-align: center;
+    width: 200px;
+    height: 30px;
+    margin-bottom: 10px;
+    border: 1px solid gray;
+    border-radius: 5px;
+    outline: none;
+  }
+
+  select {
+    color: white;
+    border-radius: 5px;
+    border: 1px solid rgba(128, 128, 128, 0.486);
+    background-color: #056CF2;
+    width: 100px;
+  }
+
+  button {
+    font-weight: bold;
+    border-radius: 5px;
+    border: 1px solid rgba(128, 128, 128, 0.486);
+    background-color: #056CF2;
+    color: white;
+    margin-top: 10px;
+    width: 100px;
+    height: 50px;
+
+    &:hover{
+      background-color: rgb(2, 75, 172);
+    }
+  }
+
+
+}

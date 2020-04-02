@@ -4,6 +4,8 @@ import queryString from 'query-string';
 
 import rot13 from '../../lib/rot13';
 
+import './Join.scss';
+
 const Join = ({ location }) => {
   const [nick, setNick] = useState('');
   const [color, setColor] = useState('white');
