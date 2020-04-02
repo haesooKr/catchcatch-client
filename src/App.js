@@ -6,6 +6,8 @@ import Create from './components/Create/Create';
 import Join from './components/Join/Join';
 import Play from './components/Play/Play';
 
+import './App.scss';
+
 const App = () => {
   return (
     <Router>
