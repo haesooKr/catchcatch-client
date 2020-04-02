@@ -231,7 +231,7 @@ const Play = ({ location }) => {
     setPrivateChat(false);
     setPoints([]);
     setCanPaint(false);
-    setInviteCode(rot13(id));
+    setInviteCode('http://localhost:3000/join?code=' + rot13(id));
   }
 
 
