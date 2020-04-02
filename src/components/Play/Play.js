@@ -57,15 +57,25 @@ const Play = ({ location }) => {
       );
     } else {
       if (inviteCode !== "random") {
-        socket.emit("join", { nick, color, code: inviteCode }, () => {
-          alert("현재 게임이 진행중입니다. 다른 방에 입장하거나 기다려주십시오.");
+        socket.emit("join", { nick, color, code: inviteCode }, (error) => {
+          if(error) {
+            alert(error)
+          }
+          else {
+            alert("현재 게임이 진행중입니다. 다른 방에 입장하거나 기다려주십시오.");
+          }
           window.history.go(-1);
         });
       } else {
-        socket.emit("join", { nick, color, code: "random" }, () => {
-          alert(
-            "랜덤입장은 아직 준비중입니다. 초대받은 주소로 접속 후 플레이를 눌러주세요"
-          );
+        socket.emit("join", { nick, color, code: "random" }, (error) => {
+          if(error) {
+            alert(error);
+          }
+          else {
+            alert(
+              "랜덤입장은 아직 준비중입니다. 초대받은 주소로 접속 후 플레이를 눌러주세요"
+            );
+          }
           window.history.go(-1);
         });
       }
